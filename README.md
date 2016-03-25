@@ -16,7 +16,7 @@ $ oc create -f aspnet-4.5-imagestream.json -n openshift
 $ oc create -f aspnet-5.0-imagestream.json -n openshift
 ```
 ### Install .NET Templates
-To install .NET Templates provided by Click2Cloud, download and save all template files from this repository onto onto OpenShift 3 Master Node. Navigate to location on OpenShift Master Node where you have saved template json files and run below command as a `root` user.
+To install .NET Templates provided by Click2Cloud, download and save all template files from this repository onto OpenShift 3 Master Node. Navigate to location on OpenShift Master Node where you have saved template files and run below command as a `root` user.
 ```
 $ oc create -f aspnet-4.5-template.json -n openshift
 $ oc create -f aspnet-4.5-externaldb-template.json -n openshift
@@ -29,3 +29,4 @@ $ oc create -f aspnet-5.0-mongodb-template.json -n openshift
 $ oc create -f aspnet-5.0-mysql-template.json -n openshift
 $ oc create -f aspnet-5.0-postgresql-template.json -n openshift
 ```
+After installing .NET Templates, verify it from OpenShift Web Console.
