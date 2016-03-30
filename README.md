@@ -2,7 +2,7 @@
 This repository contains guideline to enable .Net support on OpenShift 3 Cloud. 
 
 ## Install at `openshift` Namespace level
-To install .NET templates and image streams at `openshift` namespace level, you must have access to OpenShift 3 server as a admin. Follow below instruction to deploy Click2Cloud's .NET Builder Images and Templates to run .NET applications in container on OpenShift 3.
+To install .NET templates and image streams at `openshift` namespace level, you must have admin access on OpenShift 3 server. Follow below instruction to deploy Click2Cloud's .NET Builder Images and Templates to run .NET applications in container on OpenShift 3.
 
 ### Deploy Builder Image on OpenShift 3
 Run below command in all Nodes of OpenShift
