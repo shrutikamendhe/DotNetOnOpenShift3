@@ -1,5 +1,8 @@
 # Enable .NET Support on OpenShift 3
-This repository contains guideline to enable .Net support on OpenShift 3 Cloud. Follow below instruction to deploy Click2Cloud's .NET Builder Images and Templates to run .NET applications in container on OpenShift 3.
+This repository contains guideline to enable .Net support on OpenShift 3 Cloud. 
+
+## Install at `openshift` Namespace level
+To install .NET templates and image streams at `openshift` namespace level, you must have access to OpenShift 3 server as a admin. Follow below instruction to deploy Click2Cloud's .NET Builder Images and Templates to run .NET applications in container on OpenShift 3.
 
 ### Deploy Builder Image on OpenShift 3
 Run below command in all Nodes of OpenShift
@@ -17,18 +20,12 @@ Once you have pulled .NET Builder Images, it is required to define it in Image S
 $ git clone https://github.com/Click2Cloud/DotNetOnOpenShift3.git
 $ cd DotNetOnOpenShift3
 ```
-##### On OpenShift 3 Enterprise
+##### Install .NET Imagestreams
 ```
 $ oc create -f aspnet-4.5-imagestream.json -n openshift
 $ oc create -f aspnet-5.0-imagestream.json -n openshift
 ```
-##### On OpenShift 3 Origin
-```
-$ oc create -f aspnet-4.5-imagestream-origin.json -n openshift
-$ oc create -f aspnet-5.0-imagestream-origin.json -n openshift
-```
 ### Install .NET Templates
-After installing image stream, to install .NET templates provided by Click2Cloud run below commands as a `root` user. 
 ```
 $ oc create -f aspnet-4.5-template.json -n openshift
 $ oc create -f aspnet-4.5-externaldb-template.json -n openshift
