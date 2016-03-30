@@ -11,10 +11,13 @@
         "creationTimestamp": null
       },
       "spec": {
-        "dockerImageRepository": "docker.io/click2cloud/aspnet-s2i-4.5",
         "tags": [
           {
-            "name": "latest"
+            "name": "latest",
+            "from": {
+              "kind": "ImageStreamTag",
+              "name": "4.5"
+            }
           },
           {
             "name": "4.5",
@@ -26,8 +29,8 @@
               "version": "4.5"
             },
             "from": {
-              "Kind": "ImageStreamTag",
-              "Name": "latest"
+              "kind": "DockerImage",
+              "name": "click2cloud/aspnet-s2i-4.5:latest"
             }
           }
         ]

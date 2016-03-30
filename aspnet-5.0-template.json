@@ -13,6 +13,39 @@
   },
   "objects": [
     {
+      "kind": "ImageStream",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "aspnetcore",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "tags": [
+          {
+            "name": "latest",
+            "from": {
+              "kind": "ImageStreamTag",
+              "name": "1.0"
+            }
+          },
+          {
+            "name": "1.0",
+            "annotations": {
+              "description": "Build and run ASP.NET Core 1.0 applications",
+              "iconClass": "icon-aspnet",
+              "tags": "builder,aspnet,aspnet5.0,aspnetcore1.0",
+              "supports": "aspnetcore:1.0,aspnet:5.0,aspnet",
+              "version": "1.0"
+            },
+            "from": {
+              "kind": "DockerImage",
+              "name": "click2cloud/aspnet-s2i-core-1.0:latest"
+            }
+          }
+        ]
+      }
+    },
+    {
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
@@ -71,7 +104,6 @@
           "sourceStrategy": {
             "from": {
               "kind": "ImageStreamTag",
-              "namespace": "openshift",
               "name": "aspnetcore:latest"
             }
           }
