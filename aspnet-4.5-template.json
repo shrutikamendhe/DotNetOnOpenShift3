@@ -23,8 +23,8 @@
         "ports": [
           {
             "name": "web",
-            "port": 5004,
-            "targetPort": 5004
+            "port": 5000,
+            "targetPort": 5000
           }
         ],
         "selector": { "name": "aspnet-45-example" }
@@ -126,7 +126,7 @@
               {
                 "name": "aspnet-45-example",
                 "image": "aspnet-45-example",
-                "ports": [ { "containerPort": 5004 } ],
+                "ports": [ { "containerPort": 5000 } ],
                 "env": [
                   {
                     "name": "ASPNET_SECRET_TOKEN",

@@ -23,7 +23,7 @@
             "name": "4.5",
             "from": {
               "kind": "DockerImage",
-              "name": "click2cloud/aspnet-s2i-4.5:latest"
+              "name": "click2cloud/aspnet-4.5-centos7:latest"
             }
           }
         ]
