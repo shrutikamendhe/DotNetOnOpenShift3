@@ -13,7 +13,7 @@ $ docker pull click2cloud/aspnet-4.5-rhel7
 This will pull Click2Cloud's .NET Builder Images from Docker Hub onto OpenShift 3 Nodes.
 
 ### 2) Install .NET Image Stream
-Once you have pulled .NET Builder Images, it is required to define it in Image Stream list. Login to OpenShift 3 Master node and run below commands as a `root` user.
+Once you have pulled .NET Builder Images, it is required to define it in Imagestream list. Login to OpenShift 3 Master node and run below commands as a `root` user.
 
 ##### Clone DotNetOnOpenShift3 repository
 ```
@@ -35,7 +35,7 @@ $ oc create -f aspnet-5.0-imagestream.json -n openshift
 $ oc create -f aspnet-5.0-imagestream-origin.json -n openshift
 ```
 ### Install .NET Templates
-After installing image stream, to install .NET templates provided by Click2Cloud run below commands as a `root` user. 
+After installing imagestream, install .NET templates provided by Click2Cloud run below commands as a `root` user. 
 
 #### To Install ASP.NET 4.5 Templates
 ```
