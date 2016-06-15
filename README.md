@@ -4,14 +4,10 @@ This repository contains guide line to enable .NET support on OpenShift 3 Cloud.
 ### 1) Pull Builder Image on OpenShift 3
 Run below command in all Nodes of OpenShift
 ```
-$ docker pull click2cloud/aspnet-4.5-centos7
-```
-OR
-```
-$ docker pull click2cloud/aspnet-4.5-rhel7
-```
-```
 $ docker pull click2cloud/aspnet-s2i-core-1.0
+$ docker pull click2cloud/aspnet-4.5-centos7 
+OR
+$ docker pull click2cloud/aspnet-4.5-rhel7
 ```
 
 This will pull Click2Cloud's .NET Builder Images from Docker Hub onto OpenShift 3 Nodes.
@@ -27,9 +23,7 @@ $ cd DotNetOnOpenShift3
 #### For ASP.NET 4.5 image
 ```
 $ oc create -f aspnet-4.5-centos-imagestream.json -n openshift
-```
 OR
-```
 $ oc create -f aspnet-4.5-rhel-imagestream.json -n openshift
 ```
 #### For ASP.NET 5.0 image On OpenShift 3 Enterprise
