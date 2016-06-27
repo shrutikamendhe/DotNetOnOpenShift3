@@ -173,7 +173,7 @@
     {
       "name": "SOURCE_REPOSITORY_URL",
       "description": "The URL of the repository with your application source code",
-      "value": "https://github.com/click2Cloud/mvc-openshift-source.git",
+      "value": "https://github.com/Click2Cloud/aspnet-core-1.0-helloworld.git",
       "from": null,
       "generate": null,
       "generator": null
