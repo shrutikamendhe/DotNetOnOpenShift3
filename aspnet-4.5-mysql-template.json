@@ -337,7 +337,7 @@
     {
       "name": "DATABASE_USER",
       "description": "Database user name",
-      "value": "cakephp",
+      "value": "",
       "from": null,
       "generate": null,
       "generator": null
