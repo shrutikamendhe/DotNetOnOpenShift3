@@ -173,7 +173,7 @@
     {
       "name": "SOURCE_REPOSITORY_URL",
       "description": "The URL of the repository with your application source code",
-      "value": "https://github.com/click2cloud/aspnet-45-sample.git",
+      "value": "https://github.com/click2cloud/aspnet-45-helloworld.git",
       "from": null,
       "generate": null,
       "generator": null
