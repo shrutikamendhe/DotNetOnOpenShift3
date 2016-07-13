@@ -46,17 +46,17 @@ oc project <projectname>
 
 ##### To Install ASP.NET 4.5 Templates
 ```
-oc create -f aspnet-4.5-template.json -
+oc create -f aspnet-4.5-template.json
 oc create -f aspnet-4.5-externaldb-template.json
 oc create -f aspnet-4.5-mongodb-template.json
-oc create -f aspnet-4.5-mysql-template.json 
+oc create -f aspnet-4.5-mysql-template.json
 oc create -f aspnet-4.5-postgresql-template.json
 ```
 ##### To Install ASP.NET 5.0 Templates
 ```
-oc create -f aspnet-5.0-template.json -
-oc create -f aspnet-5.0-externaldb-template.json 
-oc create -f aspnet-5.0-mongodb-template.json 
-oc create -f aspnet-5.0-mysql-template.json 
-oc create -f aspnet-5.0-postgresql-template.json 
+oc create -f aspnet-5.0-template.json
+oc create -f aspnet-5.0-externaldb-template.json
+oc create -f aspnet-5.0-mongodb-template.json
+oc create -f aspnet-5.0-mysql-template.json
+oc create -f aspnet-5.0-postgresql-template.json
 ```
