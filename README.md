@@ -23,11 +23,11 @@ oc create -f aspnet-4.5-postgresql-template.json -n openshift
 ```
 ##### To Install ASP.NET 5.0 Templates
 ```
-oc create -f aspnet-5.0-template.json -n openshift
-oc create -f aspnet-5.0-externaldb-template.json -n openshift
-oc create -f aspnet-5.0-mongodb-template.json -n openshift
-oc create -f aspnet-5.0-mysql-template.json -n openshift
-oc create -f aspnet-5.0-postgresql-template.json -n openshift
+oc create -f aspnet-core-1.0-template.json -n openshift
+oc create -f aspnet-core-1.0-externaldb-template.json -n openshift
+oc create -f aspnet-core-1.0-mongodb-template.json -n openshift
+oc create -f aspnet-core-1.0-mysql-template.json -n openshift
+oc create -f aspnet-core-1.0-postgresql-template.json -n openshift
 ```
 After installing .NET Templates, verify it from OpenShift Web Console. You should get following result after searching `asp` in `Select Image or Template` page.
 
@@ -54,9 +54,9 @@ oc create -f aspnet-4.5-postgresql-template.json
 ```
 ##### To Install ASP.NET 5.0 Templates
 ```
-oc create -f aspnet-5.0-template.json
-oc create -f aspnet-5.0-externaldb-template.json
-oc create -f aspnet-5.0-mongodb-template.json
-oc create -f aspnet-5.0-mysql-template.json
-oc create -f aspnet-5.0-postgresql-template.json
+oc create -f aspnet-core-1.0-template.json
+oc create -f aspnet-core-1.0-externaldb-template.json
+oc create -f aspnet-core-1.0-mongodb-template.json
+oc create -f aspnet-core-1.0-mysql-template.json
+oc create -f aspnet-core-1.0-postgresql-template.json
 ```

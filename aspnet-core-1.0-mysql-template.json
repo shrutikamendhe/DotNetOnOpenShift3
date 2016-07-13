@@ -1,18 +1,16 @@
 {
-  "labels": { "template": "aspnetcore-mysql-ex" },
+  "labels": { "template": "aspnet-core-mysql-ex" },
   "apiVersion": "v1",
   "kind": "Template",
   "metadata": {
-    "name": "aspnetcore-mysql-ex",
-    "namespace": "openshift",
-    "selfLink": "/oapi/v1/namespaces/openshift/templates/aspnetcore-mysql-ex",
+    "name": "aspnet-core-mysql-ex",
     "uid": "0016dc07-9728-11e5-be98-00155d00682g",
     "resourceVersion": "245",
     "creationTimestamp": "2016-01-16T12:02:56Z",
     "annotations": {
-      "description": "An example ASP.NET Core 1.0 application with mysql database",
+      "description": "An example ASP.NET Core 1.0.0 application with mysql database",
       "iconClass": "icon-aspnet",
-      "tags": "instant-app,aspnet,aspnetcore1.0,aspnet5.0,mysql"
+      "tags": "instant-app,aspnet,aspnetcore1.0.0,mysql"
     }
   },
   "objects": [
@@ -20,7 +18,7 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnetcore-mysql-ex",
+        "name": "aspnet-core-mysql-ex",
         "annotations": { "description": "Exposes and load balances the application pods" }
       },
       "spec": {
@@ -31,18 +29,18 @@
             "targetPort": 5000
           }
         ],
-        "selector": { "name": "aspnetcore-mysql-ex" }
+        "selector": { "name": "aspnet-core-mysql-ex" }
       }
     },
     {
       "kind": "Route",
       "apiVersion": "v1",
-      "metadata": { "name": "aspnetcore-mysql-ex" },
+      "metadata": { "name": "aspnet-core-mysql-ex" },
       "spec": {
         "host": "${APPLICATION_DOMAIN}",
         "to": {
           "kind": "Service",
-          "name": "aspnetcore-mysql-ex"
+          "name": "aspnet-core-mysql-ex"
         }
       }
     },
@@ -50,7 +48,7 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnetcore-mysql-ex",
+        "name": "aspnet-core-mysql-ex",
         "annotations": { "description": "Keeps track of changes in the application image" }
       }
     },
@@ -58,7 +56,7 @@
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnetcore-mysql-ex",
+        "name": "aspnet-core-mysql-ex",
         "annotations": { "description": "Defines how to build the application" }
       },
       "spec": {
@@ -74,16 +72,16 @@
           "type": "Source",
           "sourceStrategy": {
             "from": {
-              "kind": "ImageStreamTag",
-              "namespace": "openshift",
-              "name": "aspnetcore:latest"
-            }
+              "kind": "DockerImage",
+              "name": "click2cloud/aspnet-core-centos7:latest"
+            },
+            "forcePull": true
           }
         },
         "output": {
           "to": {
             "kind": "ImageStreamTag",
-            "name": "aspnetcore-mysql-ex:latest"
+            "name": "aspnet-core-mysql-ex:latest"
           }
         },
         "triggers": [
@@ -99,7 +97,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnetcore-mysql-ex",
+        "name": "aspnet-core-mysql-ex",
         "annotations": { "description": "Defines how to deploy the application server" }
       },
       "spec": {
@@ -109,27 +107,27 @@
             "type": "ImageChange",
             "imageChangeParams": {
               "automatic": true,
-              "containerNames": [ "aspnetcore-mysql-ex" ],
+              "containerNames": [ "aspnet-core-mysql-ex" ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "aspnetcore-mysql-ex:latest"
+                "name": "aspnet-core-mysql-ex:latest"
               }
             }
           },
           { "type": "ConfigChange" }
         ],
         "replicas": 1,
-        "selector": { "name": "aspnetcore-mysql-ex" },
+        "selector": { "name": "aspnet-core-mysql-ex" },
         "template": {
           "metadata": {
-            "name": "aspnetcore-mysql-ex",
-            "labels": { "name": "aspnetcore-mysql-ex" }
+            "name": "aspnet-core-mysql-ex",
+            "labels": { "name": "aspnet-core-mysql-ex" }
           },
           "spec": {
             "containers": [
               {
-                "name": "aspnetcore-mysql-ex",
-                "image": "aspnetcore-mysql-ex",
+                "name": "aspnet-core-mysql-ex",
+                "image": "aspnet-core-mysql-ex",
                 "ports": [ { "containerPort": 5000 } ],
                 "env": [
                   {
@@ -241,7 +239,7 @@
     {
       "name": "SOURCE_REPOSITORY_URL",
       "description": "The URL of the repository with your application source code",
-      "value": "https://github.com/Click2Cloud/aspnet-core-1.0-helloworld.git",
+      "value": "https://github.com/click2cloud/aspnet-core-10-ex.git",
       "from": null,
       "generate": null,
       "generator": null
@@ -337,7 +335,7 @@
     {
       "name": "DATABASE_USER",
       "description": "Database user name",
-      "value": "cakephp",
+      "value": "aspnet",
       "from": null,
       "generate": null,
       "generator": null
@@ -358,7 +356,7 @@
       "generate": null,
       "generator": null
     }
-    
+
   ]
- 
+
 }

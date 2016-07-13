@@ -1,14 +1,12 @@
 {
   "metadata": {
-    "name": "aspnetcore-ex",
-    "namespace": "openshift",
-    "selfLink": "/oapi/v1/namespaces/openshift/templates/aspnetcore-ex",
+    "name": "aspnet-core-example",
     "uid": "0016dc07-9728-11e5-be98-00155d00682d",
     "resourceVersion": "245",
     "annotations": {
-      "description": "An example ASP.NET Core 1.0 application with no database",
+      "description": "An example ASP.NET Core 1.0.0 application with no database",
       "iconClass": "icon-aspnet",
-      "tags": "instant-app,aspnet,aspnetcore1.0,aspnet5.0"
+      "tags": "instant-app,aspnet,aspnetcore1.0.0"
     }
   },
   "objects": [
@@ -16,7 +14,7 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnetcore-ex",
+        "name": "aspnet-core-example",
         "annotations": { "description": "Exposes and load balances the application pods" }
       },
       "spec": {
@@ -27,18 +25,18 @@
             "targetPort": 5000
           }
         ],
-        "selector": { "name": "aspnetcore-ex" }
+        "selector": { "name": "aspnet-core-example" }
       }
     },
     {
       "kind": "Route",
       "apiVersion": "v1",
-      "metadata": { "name": "aspnetcore-ex" },
+      "metadata": { "name": "aspnet-core-example" },
       "spec": {
         "host": "${APPLICATION_DOMAIN}",
         "to": {
           "kind": "Service",
-          "name": "aspnetcore-ex"
+          "name": "aspnet-core-example"
         }
       }
     },
@@ -46,7 +44,7 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnetcore-ex",
+        "name": "aspnet-core-example",
         "annotations": { "description": "Keeps track of changes in the application image" }
       }
     },
@@ -54,7 +52,7 @@
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnetcore-ex",
+        "name": "aspnet-core-example",
         "annotations": { "description": "Defines how to build the application" }
       },
       "spec": {
@@ -70,16 +68,16 @@
           "type": "Source",
           "sourceStrategy": {
             "from": {
-              "kind": "ImageStreamTag",
-              "namespace": "openshift",
-              "name": "aspnetcore:latest"
-            }
+              "kind": "DockerImage",
+              "name": "click2cloud/aspnet-core-centos7:latest"
+            },
+            "forcePull": true
           }
         },
         "output": {
           "to": {
             "kind": "ImageStreamTag",
-            "name": "aspnetcore-ex:latest"
+            "name": "aspnet-core-example:latest"
           }
         },
         "triggers": [
@@ -95,7 +93,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnetcore-ex",
+        "name": "aspnet-core-example",
         "annotations": { "description": "Defines how to deploy the application server" }
       },
       "spec": {
@@ -105,27 +103,27 @@
             "type": "ImageChange",
             "imageChangeParams": {
               "automatic": true,
-              "containerNames": [ "aspnetcore-ex" ],
+              "containerNames": [ "aspnet-core-example" ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "aspnetcore-ex:latest"
+                "name": "aspnet-core-example:latest"
               }
             }
           },
           { "type": "ConfigChange" }
         ],
         "replicas": 1,
-        "selector": { "name": "aspnetcore-ex" },
+        "selector": { "name": "aspnet-core-example" },
         "template": {
           "metadata": {
-            "name": "aspnetcore-ex",
-            "labels": { "name": "aspnetcore-ex" }
+            "name": "aspnet-core-example",
+            "labels": { "name": "aspnet-core-example" }
           },
           "spec": {
             "containers": [
               {
-                "name": "aspnetcore-ex",
-                "image": "aspnetcore-ex",
+                "name": "aspnet-core-example",
+                "image": "aspnet-core-example",
                 "ports": [ { "containerPort": 5000 } ],
                 "env": [
                   {
@@ -156,7 +154,7 @@
     {
       "name": "SOURCE_REPOSITORY_URL",
       "description": "The URL of the repository with your application source code",
-      "value": "https://github.com/Click2Cloud/aspnet-core-1.0-helloworld.git",
+      "value": "https://github.com/click2cloud/aspnet-core-10-ex.git",
       "from": null,
       "generate": null,
       "generator": null
@@ -226,7 +224,7 @@
       "generator": null
     }
   ],
-  "labels": { "template": "aspnetcore-ex" },
+  "labels": { "template": "aspnet-core-example" },
   "apiVersion": "v1",
   "kind": "Template"
 }

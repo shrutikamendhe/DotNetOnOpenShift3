@@ -1,15 +1,16 @@
 {
+  "labels": { "template": "aspnet-core-postgresql" },
+  "apiVersion": "v1",
+  "kind": "Template",
   "metadata": {
-    "name": "aspnetcore-externaldb-ex",
-    "namespace": "openshift",
-    "selfLink": "/oapi/v1/namespaces/openshift/templates/aspnetcore-externaldb-ex",
-    "uid": "0016dc07-9728-11e5-be98-00155d00682h",
+    "name": "aspnet-core-postgresql",
+    "uid": "0016dc07-9728-11e5-be98-00155d00682g",
     "resourceVersion": "245",
-    "creationTimestamp": "2015-11-30T06:02:56Z",
+    "creationTimestamp": "2016-01-16T12:02:56Z",
     "annotations": {
-      "description": "An example ASP.NET Core 1.0 application with external database",
+      "description": "An example ASP.NET Core 1.0.0 application with postgresql database",
       "iconClass": "icon-aspnet",
-      "tags": "instant-app,aspnet,aspnetcore1.0,aspnet5.0,externaldb"
+      "tags": "instant-app,aspnet,aspnetcore1.0.0,postgresql"
     }
   },
   "objects": [
@@ -17,7 +18,7 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnetcore-externaldb-ex",
+        "name": "aspnet-core-postgresql",
         "annotations": { "description": "Exposes and load balances the application pods" }
       },
       "spec": {
@@ -28,18 +29,18 @@
             "targetPort": 5000
           }
         ],
-        "selector": { "name": "aspnetcore-externaldb-ex" }
+        "selector": { "name": "aspnet-core-postgresql" }
       }
     },
     {
       "kind": "Route",
       "apiVersion": "v1",
-      "metadata": { "name": "aspnetcore-externaldb-ex" },
+      "metadata": { "name": "aspnet-core-postgresql" },
       "spec": {
         "host": "${APPLICATION_DOMAIN}",
         "to": {
           "kind": "Service",
-          "name": "aspnetcore-externaldb-ex"
+          "name": "aspnet-core-postgresql"
         }
       }
     },
@@ -47,7 +48,7 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnetcore-externaldb-ex",
+        "name": "aspnet-core-postgresql",
         "annotations": { "description": "Keeps track of changes in the application image" }
       }
     },
@@ -55,7 +56,7 @@
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnetcore-externaldb-ex",
+        "name": "aspnet-core-postgresql",
         "annotations": { "description": "Defines how to build the application" }
       },
       "spec": {
@@ -71,16 +72,16 @@
           "type": "Source",
           "sourceStrategy": {
             "from": {
-              "kind": "ImageStreamTag",
-              "namespace": "openshift",
-              "name": "aspnetcore:latest"
-            }
+              "kind": "DockerImage",
+              "name": "click2cloud/aspnet-core-centos7:latest"
+            },
+            "forcePull": true
           }
         },
         "output": {
           "to": {
             "kind": "ImageStreamTag",
-            "name": "aspnetcore-externaldb-ex:latest"
+            "name": "aspnet-core-postgresql:latest"
           }
         },
         "triggers": [
@@ -96,7 +97,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnetcore-externaldb-ex",
+        "name": "aspnet-core-postgresql",
         "annotations": { "description": "Defines how to deploy the application server" }
       },
       "spec": {
@@ -106,27 +107,27 @@
             "type": "ImageChange",
             "imageChangeParams": {
               "automatic": true,
-              "containerNames": [ "aspnetcore-externaldb-ex" ],
+              "containerNames": [ "aspnet-core-postgresql" ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "aspnetcore-externaldb-ex:latest"
+                "name": "aspnet-core-postgresql:latest"
               }
             }
           },
           { "type": "ConfigChange" }
         ],
         "replicas": 1,
-        "selector": { "name": "aspnetcore-externaldb-ex" },
+        "selector": { "name": "aspnet-core-postgresql" },
         "template": {
           "metadata": {
-            "name": "aspnetcore-externaldb-ex",
-            "labels": { "name": "aspnetcore-externaldb-ex" }
+            "name": "aspnet-core-postgresql",
+            "labels": { "name": "aspnet-core-postgresql" }
           },
           "spec": {
             "containers": [
               {
-                "name": "aspnetcore-externaldb-ex",
-                "image": "aspnetcore-externaldb-ex",
+                "name": "aspnet-core-postgresql",
+                "image": "aspnet-core-postgresql",
                 "ports": [ { "containerPort": 5000 } ],
                 "env": [
                   {
@@ -150,15 +151,80 @@
                     "value": "${DATABASE_SERVICE_NAME}"
                   },
                   {
-                    "name": "EXTERNALDB_USER",
+                    "name": "DATABASE_ENGINE",
+                    "value": "${DATABASE_ENGINE}"
+                  },
+                  {
+                    "name": "DATABASE_NAME",
+                    "value": "${DATABASE_NAME}"
+                  },
+                  {
+                    "name": "DATABASE_USER",
                     "value": "${DATABASE_USER}"
                   },
                   {
-                    "name": "EXTERNALDB_PASSWORD",
+                    "name": "DATABASE_PASSWORD",
+                    "value": "${DATABASE_PASSWORD}"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${DATABASE_SERVICE_NAME}",
+        "annotations": { "description": "Exposes the database server" }
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "postgresql",
+            "port": 5432,
+            "targetPort": 5432
+          }
+        ],
+        "selector": { "name": "${DATABASE_SERVICE_NAME}" }
+      }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${DATABASE_SERVICE_NAME}",
+        "annotations": { "description": "Defines how to deploy the database" }
+      },
+      "spec": {
+        "strategy": { "type": "Recreate" },
+        "triggers": [ { "type": "ConfigChange" } ],
+        "replicas": 1,
+        "selector": { "name": "${DATABASE_SERVICE_NAME}" },
+        "template": {
+          "metadata": {
+            "name": "${DATABASE_SERVICE_NAME}",
+            "labels": { "name": "${DATABASE_SERVICE_NAME}" }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "postgresql",
+                "image": "${POSTGRESQL_IMAGE}",
+                "ports": [ { "containerPort": 5432 } ],
+                "env": [
+                  {
+                    "name": "POSTGRESQL_USER",
+                    "value": "${DATABASE_USER}"
+                  },
+                  {
+                    "name": "POSTGRESQL_PASSWORD",
                     "value": "${DATABASE_PASSWORD}"
                   },
                   {
-                    "name": "EXTERNALDB_DATABASENAME",
+                    "name": "POSTGRESQL_DATABASE",
                     "value": "${DATABASE_NAME}"
                   }
                 ]
@@ -173,7 +239,7 @@
     {
       "name": "SOURCE_REPOSITORY_URL",
       "description": "The URL of the repository with your application source code",
-      "value": "https://github.com/Click2Cloud/aspnet-core-1.0-helloworld.git",
+      "value": "https://github.com/click2cloud/aspnet-core-10-ex.git",
       "from": null,
       "generate": null,
       "generator": null
@@ -245,37 +311,52 @@
     {
       "name": "DATABASE_SERVICE_NAME",
       "description": "Database service name",
-      "value": "externaldb",
+      "value": "postgresql",
+      "from": null,
+      "generate": null,
+      "generator": null
+    },
+    {
+      "name": "DATABASE_ENGINE",
+      "description": "Database engine: postgresql, mysql or sqlite (default)",
+      "value": "postgresql",
+      "from": null,
+      "generate": null,
+      "generator": null
+    },
+    {
+      "name": "DATABASE_NAME",
+      "description": "Database name",
+      "value": "default",
       "from": null,
       "generate": null,
       "generator": null
     },
     {
       "name": "DATABASE_USER",
-      "description": "Username for External DB user that will be used for accessing the database",
-      "generate": "expression",
-      "from": "user[A-Z0-9]{3}",
-      "generator": null,
-      "value": ""
+      "description": "Database user name",
+      "value": "aspnet",
+      "from": null,
+      "generate": null,
+      "generator": null
     },
     {
       "name": "DATABASE_PASSWORD",
-      "description": "Password for the MongoDB user",
+      "description": "Database user password",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}",
       "generator": null,
       "value": ""
     },
     {
-      "name": "DATABASE_NAME",
-      "description": "Database name",
-      "value": "",
+      "name": "POSTGRESQL_IMAGE",
+      "description": "Image to use for postgresql",
+      "value": "openshift/postgresql-92-centos7",
       "from": null,
       "generate": null,
       "generator": null
     }
-  ],
-  "labels": { "template": "aspnetcore-externaldb-ex" },
-  "apiVersion": "v1",
-  "kind": "Template"
+    
+  ]
+ 
 }

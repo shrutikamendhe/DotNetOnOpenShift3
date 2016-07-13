@@ -71,7 +71,8 @@
             "from": {
               "kind": "DockerImage",
               "name": "click2cloud/aspnet-4.5-centos7:latest"
-            }
+            },
+            "forcePull": true
           }
         },
         "output": {
