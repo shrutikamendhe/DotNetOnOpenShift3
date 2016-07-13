@@ -28,6 +28,6 @@ oc create -f aspnet-5.0-mongodb-template.json -n openshift
 oc create -f aspnet-5.0-mysql-template.json -n openshift
 oc create -f aspnet-5.0-postgresql-template.json -n openshift
 ```
-After installing .NET Templates, verify it from OpenShift Web Console. You should get following result after searching `ASPNET` in `Select Image or Template` page.
+After installing .NET Templates, verify it from OpenShift Web Console. You should get following result after searching `asp` in `Select Image or Template` page.
 
 ![Search Result](/result.png?raw=true "Result")
