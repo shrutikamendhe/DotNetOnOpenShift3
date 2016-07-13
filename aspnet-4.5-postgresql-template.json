@@ -4,8 +4,6 @@
   "kind": "Template",
   "metadata": {
     "name": "aspnet-45-postgresql-ex",
-    "namespace": "openshift",
-    "selfLink": "/oapi/v1/namespaces/openshift/templates/aspnet-45-postgresql-ex",
     "uid": "0016dc07-9728-11e5-be98-00155d00682g",
     "resourceVersion": "245",
     "creationTimestamp": "2016-01-16T12:02:56Z",

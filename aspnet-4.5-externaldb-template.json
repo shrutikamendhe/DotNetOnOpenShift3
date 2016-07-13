@@ -1,8 +1,6 @@
 {
   "metadata": {
     "name": "aspnet-45-externaldb-ex",
-    "namespace": "openshift",
-    "selfLink": "/oapi/v1/namespaces/openshift/templates/aspnet-45-externaldb-ex",
     "uid": "0016dc07-9728-11e5-be98-00155d00682h",
     "resourceVersion": "245",
     "creationTimestamp": "2015-11-30T06:02:56Z",
