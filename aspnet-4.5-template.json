@@ -70,9 +70,8 @@
           "type": "Source",
           "sourceStrategy": {
             "from": {
-              "kind": "ImageStreamTag",
-              "namespace": "openshift",
-              "name": "aspnet45:latest"
+              "kind": "DockerImage",
+              "name": "click2cloud/aspnet-4.5-centos7:latest"
             }
           }
         },
@@ -156,7 +155,7 @@
     {
       "name": "SOURCE_REPOSITORY_URL",
       "description": "The URL of the repository with your application source code",
-      "value": "https://github.com/click2cloud/aspnet-45-helloworld.git",
+      "value": "https://github.com/click2cloud/aspnet-45-ex.git",
       "from": null,
       "generate": null,
       "generator": null
