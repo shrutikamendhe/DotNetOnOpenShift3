@@ -71,7 +71,10 @@
               "kind": "DockerImage",
               "name": "click2cloud/aspnet-core-centos7:latest"
             },
-            "forcePull": true
+            //Set value of 'forcePull' to true if want to pull image on every build process
+            //NOTE: this will slow down the build process
+            "forcePull": false,
+            "incremental": true
           }
         },
         "output": {
