@@ -1,12 +1,12 @@
 {
+  "kind": "Template",
+  "apiVersion": "v1",
   "metadata": {
     "name": "aspnet-45-example",
-    "uid": "0016dc07-9728-11e5-be98-00155d00682d",
-    "resourceVersion": "245",
     "annotations": {
       "description": "An example ASP.NET 4.5 application with no database",
       "iconClass": "icon-aspnet",
-      "tags": "instant-app,aspnet,aspnet4.5"
+      "tags": "instant-app,aspnet,aspnet4.5,.net"
     }
   },
   "objects": [
@@ -33,7 +33,7 @@
       "apiVersion": "v1",
       "metadata": { "name": "aspnet-45-example" },
       "spec": {
-        "host": "${APPLICATION_DOMAIN}",
+        "host": "${APPLICATION_HOSTNAME}",
         "to": {
           "kind": "Service",
           "name": "aspnet-45-example"
@@ -69,7 +69,7 @@
           "sourceStrategy": {
             "from": {
               "kind": "DockerImage",
-              "name": "click2cloud/aspnet-4.5-centos7:latest"
+              "name": "docker.io/click2cloud/aspnet-4.5-centos7:latest"
             },
             "forcePull": false,
             "incremental": true
@@ -82,10 +82,15 @@
           }
         },
         "triggers": [
+          { "type": "ConfigChange" },
           { "type": "ImageChange" },
           {
             "type": "GitHub",
             "github": { "secret": "${GITHUB_WEBHOOK_SECRET}" }
+          },
+          {
+            "type": "Generic",
+            "generic": { "secret": "${GENERIC_WEBHOOK_SECRET}" }
           }
         ]
       }
@@ -126,24 +131,27 @@
                 "name": "aspnet-45-example",
                 "image": "aspnet-45-example",
                 "ports": [ { "containerPort": 5000 } ],
-                "env": [
-                  {
-                    "name": "ASPNET_SECRET_TOKEN",
-                    "value": "${ASPNET_SECRET_TOKEN}"
-                  },
-                  {
-                    "name": "ASPNET_SECURITY_SALT",
-                    "value": "${ASPNET_SECURITY_SALT}"
-                  },
-                  {
-                    "name": "ASPNET_SECURITY_CIPHER_SEED",
-                    "value": "${ASPNET_SECURITY_CIPHER_SEED}"
-                  },
-                  {
-                    "name": "OPCACHE_REVALIDATE_FREQ",
-                    "value": "${OPCACHE_REVALIDATE_FREQ}"
+                "readinessProbe": {
+                  "timeoutSeconds": 3,
+                  "initialDelaySeconds": 3,
+                  "httpGet": {
+                    "path": "/",
+                    "port": 5000
                   }
-                ]
+                },
+                "livenessProbe": {
+                  "timeoutSeconds": 3,
+                  "initialDelaySeconds": 30,
+                  "httpGet": {
+                    "path": "/",
+                    "port": 5000
+                  }
+                },
+                "resources": {
+                  "limits": {
+                    "memory": "${MEMORY_LIMIT}"
+                  }
+                }
               }
             ]
           }
@@ -153,79 +161,47 @@
   ],
   "parameters": [
     {
+      "name": "MEMORY_LIMIT",
+      "displayName": "Memory Limit",
+      "description": "Maximum amount of memory the .NET Core container can use.",
+      "value": "512Mi",
+      "required": true
+    },
+    {
       "name": "SOURCE_REPOSITORY_URL",
+      "displayName": "Git Repository URL",
       "description": "The URL of the repository with your application source code",
-      "value": "https://github.com/click2cloud/aspnet-45-ex.git",
-      "from": null,
-      "generate": null,
-      "generator": null
+      "value": "https://github.com/click2cloud/aspnet-45-ex.git"
     },
     {
       "name": "SOURCE_REPOSITORY_REF",
-      "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch",
-      "from": null,
-      "generate": null,
-      "generator": null,
-      "value": ""
+      "displayName": "Git Reference",
+      "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch"
     },
     {
       "name": "CONTEXT_DIR",
-      "description": "Set this to the relative path to your project if it is not in the root of your repository",
-      "from": null,
-      "generate": null,
-      "generator": null,
-      "value": ""
+      "displayName": "Context Directory",
+      "description": "Set this to the relative path to your project if it is not in the root of your repository"
     },
     {
-      "name": "APPLICATION_DOMAIN",
-      "description": "The exposed hostname that will route to the ASPNET service, if left blank a value will be defaulted.",
-      "from": null,
-      "generate": null,
-      "generator": null,
-      "value": ""
+      "name": "APPLICATION_HOSTNAME",
+      "displayName": "Application Hostname",
+      "description": "The exposed hostname that will route to the ASPNET service, if left blank a value will be defaulted."
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",
+      "displayName": "GitHub Webhook Secret",
       "description": "A secret string used to configure the GitHub webhook",
       "generate": "expression",
-      "from": "[a-zA-Z0-9]{40}",
-      "generator": null,
-      "value": ""
+      "from": "[a-zA-Z0-9]{40}"
     },
     {
-      "name": "ASPNET_SECRET_TOKEN",
-      "description": "Set this to a long random string",
+      "name": "GENERIC_WEBHOOK_SECRET",
+      "displayName": "Generic Webhook Secret",
+      "description": "A secret string used to configure the Generic webhook.",
       "generate": "expression",
-      "from": "[\\w]{50}",
-      "generator": null,
-      "value": ""
-    },
-    {
-      "name": "ASPNET_SECURITY_SALT",
-      "description": "Security salt for session hash",
-      "generate": "expression",
-      "from": "[a-zA-Z0-9]{40}",
-      "generator": null,
-      "value": ""
-    },
-    {
-      "name": "ASPNET_SECURITY_CIPHER_SEED",
-      "description": "Security cipher seed for session hash",
-      "generate": "expression",
-      "from": "[0-9]{30}",
-      "generator": null,
-      "value": ""
-    },
-    {
-      "name": "OPCACHE_REVALIDATE_FREQ",
-      "description": "The How often to check script timestamps for updates, in seconds. 0 will result in OPcache checking for updates on every request.",
-      "value": "2",
-      "from": null,
-      "generate": null,
-      "generator": null
+      "from": "[a-zA-Z0-9]{40}"
     }
   ],
-  "labels": { "template": "aspnet-45-example" },
-  "apiVersion": "v1",
-  "kind": "Template"
+  "labels": { "template": "aspnet-45-example" }
 }

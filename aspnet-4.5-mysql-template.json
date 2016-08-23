@@ -1,16 +1,12 @@
 {
-  "labels": { "template": "aspnet-45-mysql-ex" },
-  "apiVersion": "v1",
   "kind": "Template",
+  "apiVersion": "v1",
   "metadata": {
     "name": "aspnet-45-mysql-ex",
-    "uid": "0016dc07-9728-11e5-be98-00155d00682g",
-    "resourceVersion": "245",
-    "creationTimestamp": "2016-01-16T12:02:56Z",
     "annotations": {
-      "description": "An example ASP.NET 4.5 application with mysql database",
+      "description": "An example ASP.NET 4.5 application with MySQL database",
       "iconClass": "icon-aspnet",
-      "tags": "instant-app,aspnet,aspnet4.5,mysql"
+      "tags": "instant-app,aspnet,aspnet4.5,.net,mysql"
     }
   },
   "objects": [
@@ -37,7 +33,7 @@
       "apiVersion": "v1",
       "metadata": { "name": "aspnet-45-mysql-ex" },
       "spec": {
-        "host": "${APPLICATION_DOMAIN}",
+        "host": "${APPLICATION_HOSTNAME}",
         "to": {
           "kind": "Service",
           "name": "aspnet-45-mysql-ex"
@@ -86,10 +82,15 @@
           }
         },
         "triggers": [
+          { "type": "ConfigChange" },
           { "type": "ImageChange" },
           {
             "type": "GitHub",
             "github": { "secret": "${GITHUB_WEBHOOK_SECRET}" }
+          },
+          {
+            "type": "Generic",
+            "generic": { "secret": "${GENERIC_WEBHOOK_SECRET}" }
           }
         ]
       }
@@ -130,23 +131,23 @@
                 "name": "aspnet-45-mysql-ex",
                 "image": "aspnet-45-mysql-ex",
                 "ports": [ { "containerPort": 5000 } ],
+                "readinessProbe": {
+                  "timeoutSeconds": 3,
+                  "initialDelaySeconds": 3,
+                  "httpGet": {
+                    "path": "/",
+                    "port": 5000
+                  }
+                },
+                "livenessProbe": {
+                  "timeoutSeconds": 3,
+                  "initialDelaySeconds": 30,
+                  "httpGet": {
+                    "path": "/",
+                    "port": 5000
+                  }
+                },
                 "env": [
-                  {
-                    "name": "ASPNET_SECRET_TOKEN",
-                    "value": "${ASPNET_SECRET_TOKEN}"
-                  },
-                  {
-                    "name": "ASPNET_SECURITY_SALT",
-                    "value": "${ASPNET_SECURITY_SALT}"
-                  },
-                  {
-                    "name": "ASPNET_SECURITY_CIPHER_SEED",
-                    "value": "${ASPNET_SECURITY_CIPHER_SEED}"
-                  },
-                  {
-                    "name": "OPCACHE_REVALIDATE_FREQ",
-                    "value": "${OPCACHE_REVALIDATE_FREQ}"
-                  },
                   {
                     "name": "DATABASE_SERVICE_NAME",
                     "value": "${DATABASE_SERVICE_NAME}"
@@ -166,8 +167,29 @@
                   {
                     "name": "DATABASE_PASSWORD",
                     "value": "${DATABASE_PASSWORD}"
+                  },
+                  {
+                    "name": "ASPNET_SECRET_TOKEN",
+                    "value": "${CAKEPHP_SECRET_TOKEN}"
+                  },
+                  {
+                    "name": "ASPNET_SECURITY_SALT",
+                    "value": "${CAKEPHP_SECURITY_SALT}"
+                  },
+                  {
+                    "name": "ASPNET_SECURITY_CIPHER_SEED",
+                    "value": "${CAKEPHP_SECURITY_CIPHER_SEED}"
+                  },
+                  {
+                    "name": "OPCACHE_REVALIDATE_FREQ",
+                    "value": "${OPCACHE_REVALIDATE_FREQ}"
                   }
-                ]
+                ],
+                "resources": {
+                  "limits": {
+                    "memory": "${MEMORY_LIMIT}"
+                  }
+                }
               }
             ]
           }
@@ -201,7 +223,7 @@
       },
       "spec": {
         "strategy": { "type": "Recreate" },
-        "triggers": [ { "type": "ConfigChange" } ],
+        "triggers": [{"type": "ConfigChange"}],
         "replicas": 1,
         "selector": { "name": "${DATABASE_SERVICE_NAME}" },
         "template": {
@@ -228,7 +250,12 @@
                     "name": "MYSQL_DATABASE",
                     "value": "${DATABASE_NAME}"
                   }
-                ]
+                ],
+                "resources": {
+                  "limits": {
+                    "memory": "${MEMORY_MYSQL_LIMIT}"
+                  }
+                }
               }
             ]
           }
@@ -238,84 +265,59 @@
   ],
   "parameters": [
     {
+      "name": "MEMORY_LIMIT",
+      "displayName": "Memory Limit",
+      "description": "Maximum amount of memory the ASP.NET container can use.",
+      "value": "512Mi",
+      "required": true
+    },
+    {
+      "name": "MEMORY_MYSQL_LIMIT",
+      "displayName": "Memory Limit (MySQL)",
+      "description": "Maximum amount of memory the MySQL container can use.",
+      "value": "512Mi",
+      "required": true
+    },
+    {
       "name": "SOURCE_REPOSITORY_URL",
+      "displayName": "Git Repository URL",
       "description": "The URL of the repository with your application source code",
-      "value": "https://github.com/click2cloud/aspnet-45-ex.git",
-      "from": null,
-      "generate": null,
-      "generator": null
+      "value": "https://github.com/click2cloud/aspnet-mysql-sample.git"
     },
     {
       "name": "SOURCE_REPOSITORY_REF",
-      "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch",
-      "from": null,
-      "generate": null,
-      "generator": null,
-      "value": ""
+      "displayName": "Git Reference",
+      "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch"
     },
     {
       "name": "CONTEXT_DIR",
-      "description": "Set this to the relative path to your project if it is not in the root of your repository",
-      "from": null,
-      "generate": null,
-      "generator": null,
-      "value": ""
+      "displayName": "Context Directory",
+      "description": "Set this to the relative path to your project if it is not in the root of your repository"
     },
     {
-      "name": "APPLICATION_DOMAIN",
-      "description": "The exposed hostname that will route to the ASPNET service, if left blank a value will be defaulted.",
-      "from": null,
-      "generate": null,
-      "generator": null,
-      "value": ""
+      "name": "APPLICATION_HOSTNAME",
+      "displayName": "Application Hostname",
+      "description": "The exposed hostname that will route to the ASPNET service, if left blank a value will be defaulted."
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",
+      "displayName": "GitHub Webhook Secret",
       "description": "A secret string used to configure the GitHub webhook",
       "generate": "expression",
-      "from": "[a-zA-Z0-9]{40}",
-      "generator": null,
-      "value": ""
+      "from": "[a-zA-Z0-9]{40}"
     },
     {
-      "name": "ASPNET_SECRET_TOKEN",
-      "description": "Set this to a long random string",
+      "name": "GENERIC_WEBHOOK_SECRET",
+      "displayName": "Generic Webhook Secret",
+      "description": "A secret string used to configure the Generic webhook.",
       "generate": "expression",
-      "from": "[\\w]{50}",
-      "generator": null,
-      "value": ""
-    },
-    {
-      "name": "ASPNET_SECURITY_SALT",
-      "description": "Security salt for session hash",
-      "generate": "expression",
-      "from": "[a-zA-Z0-9]{40}",
-      "generator": null,
-      "value": ""
-    },
-    {
-      "name": "ASPNET_SECURITY_CIPHER_SEED",
-      "description": "Security cipher seed for session hash",
-      "generate": "expression",
-      "from": "[0-9]{30}",
-      "generator": null,
-      "value": ""
-    },
-    {
-      "name": "OPCACHE_REVALIDATE_FREQ",
-      "description": "The How often to check script timestamps for updates, in seconds. 0 will result in OPcache checking for updates on every request.",
-      "value": "2",
-      "from": null,
-      "generate": null,
-      "generator": null
+      "from": "[a-zA-Z0-9]{40}"
     },
     {
       "name": "DATABASE_SERVICE_NAME",
-      "description": "Database service name",
+      "displayName": "Database Service Name",
       "value": "mysql",
-      "from": null,
-      "generate": null,
-      "generator": null
+      "required": true
     },
     {
       "name": "DATABASE_ENGINE",
@@ -327,37 +329,55 @@
     },
     {
       "name": "DATABASE_NAME",
-      "description": "Database name",
+      "displayName": "Database Name",
       "value": "default",
-      "from": null,
-      "generate": null,
-      "generator": null
+      "required": true
     },
     {
       "name": "DATABASE_USER",
-      "description": "Database user name",
-      "value": "",
-      "from": null,
-      "generate": null,
-      "generator": null
+      "displayName": "Database User",
+      "value": "aspnet",
+      "required": true
     },
     {
       "name": "DATABASE_PASSWORD",
-      "description": "Database user password",
+      "displayName": "Database Password",
       "generate": "expression",
-      "from": "[a-zA-Z0-9]{16}",
-      "generator": null,
-      "value": ""
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "ASPNET_SECRET_TOKEN",
+      "displayName": "ASP.NET secret token",
+      "description": "Set this to a long random string",
+      "generate": "expression",
+      "from": "[\\w]{50}"
+    },
+    {
+      "name": "ASPNET_SECURITY_SALT",
+      "displayName": "ASP.NET Security Salt",
+      "description": "Security salt for session hash",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{40}"
+    },
+    {
+      "name": "ASPNET_SECURITY_CIPHER_SEED",
+      "displayName": "ASP.NET Security Cipher Seed",
+      "description": "Security cipher seed for session hash",
+      "generate": "expression",
+      "from": "[0-9]{30}"
+    },
+    {
+      "name": "OPCACHE_REVALIDATE_FREQ",
+      "displayName": "OPcache Revalidation Frequency",
+      "description": "The How often to check script timestamps for updates, in seconds. 0 will result in OPcache checking for updates on every request.",
+      "value": "2"
     },
     {
       "name": "MYSQL_IMAGE",
-      "description": "Image to use for mysql",
-      "value": "rhscl/mysql-56-rhel7",
-      "from": null,
-      "generate": null,
-      "generator": null
+      "displayName": "Image to use for mysql",
+      "value": "openshift/mysql-55-centos7",
+      "required": true
     }
-
-  ]
-
+  ],
+  "labels": { "template": "aspnet-45-mysql-ex" }
 }
