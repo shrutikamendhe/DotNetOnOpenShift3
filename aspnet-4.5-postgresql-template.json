@@ -1,16 +1,12 @@
 {
-  "labels": { "template": "aspnet-45-postgresql-ex" },
-  "apiVersion": "v1",
   "kind": "Template",
+  "apiVersion": "v1",
   "metadata": {
     "name": "aspnet-45-postgresql-ex",
-    "uid": "0016dc07-9728-11e5-be98-00155d00682g",
-    "resourceVersion": "245",
-    "creationTimestamp": "2016-01-16T12:02:56Z",
     "annotations": {
-      "description": "An example ASP.NET 4.5 application with postgresql database",
+      "description": "An example ASP.NET 4.5 application with PostgreSQL database",
       "iconClass": "icon-aspnet",
-      "tags": "instant-app,aspnet,aspnet4.5,postgresql"
+      "tags": "instant-app,aspnet,aspnet4.5,.net,postgresql"
     }
   },
   "objects": [
@@ -18,7 +14,7 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnet-45-postgresql-ex",
+        "name": "${NAME}",
         "annotations": { "description": "Exposes and load balances the application pods" }
       },
       "spec": {
@@ -29,18 +25,18 @@
             "targetPort": 5000
           }
         ],
-        "selector": { "name": "aspnet-45-postgresql-ex" }
+        "selector": { "name": "${NAME}" }
       }
     },
     {
       "kind": "Route",
       "apiVersion": "v1",
-      "metadata": { "name": "aspnet-45-postgresql-ex" },
+      "metadata": { "name": "${NAME}" },
       "spec": {
-        "host": "${APPLICATION_DOMAIN}",
+        "host": "${APPLICATION_HOSTNAME}",
         "to": {
           "kind": "Service",
-          "name": "aspnet-45-postgresql-ex"
+          "name": "${NAME}"
         }
       }
     },
@@ -48,7 +44,7 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnet-45-postgresql-ex",
+        "name": "${NAME}",
         "annotations": { "description": "Keeps track of changes in the application image" }
       }
     },
@@ -56,7 +52,7 @@
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnet-45-postgresql-ex",
+        "name": "${NAME}",
         "annotations": { "description": "Defines how to build the application" }
       },
       "spec": {
@@ -82,14 +78,19 @@
         "output": {
           "to": {
             "kind": "ImageStreamTag",
-            "name": "aspnet-45-postgresql-ex:latest"
+            "name": "${NAME}:latest"
           }
         },
         "triggers": [
           { "type": "ImageChange" },
+          { "type": "ConfigChange" },
           {
             "type": "GitHub",
             "github": { "secret": "${GITHUB_WEBHOOK_SECRET}" }
+          },
+          {
+            "type": "Generic",
+            "generic": { "secret": "${GENERIC_WEBHOOK_SECRET}" }
           }
         ]
       }
@@ -98,7 +99,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnet-45-postgresql-ex",
+        "name": "${NAME}",
         "annotations": { "description": "Defines how to deploy the application server" }
       },
       "spec": {
@@ -108,66 +109,75 @@
             "type": "ImageChange",
             "imageChangeParams": {
               "automatic": true,
-              "containerNames": [ "aspnet-45-postgresql-ex" ],
+              "containerNames": [ "${NAME}" ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "aspnet-45-postgresql-ex:latest"
+                "name": "${NAME}:latest"
               }
             }
           },
           { "type": "ConfigChange" }
         ],
         "replicas": 1,
-        "selector": { "name": "aspnet-45-postgresql-ex" },
+        "selector": { "name": "${NAME}" },
         "template": {
           "metadata": {
-            "name": "aspnet-45-postgresql-ex",
-            "labels": { "name": "aspnet-45-postgresql-ex" }
+            "name": "${NAME}",
+            "labels": { "name": "${NAME}" }
           },
           "spec": {
             "containers": [
               {
-                "name": "aspnet-45-postgresql-ex",
-                "image": "aspnet-45-postgresql-ex",
+                "name": "${NAME}",
+                "image": "${NAME}",
                 "ports": [ { "containerPort": 5000 } ],
+                "readinessProbe": {
+                  "timeoutSeconds": 3,
+                  "initialDelaySeconds": 5,
+                  "httpGet": {
+                    "path": "/",
+                    "port": 5000
+                  }
+                },
+                "livenessProbe": {
+                  "timeoutSeconds": 3,
+                  "initialDelaySeconds": 10,
+                  "httpGet": {
+                    "path": "/",
+                    "port": 5000
+                  }
+                },
                 "env": [
-                  {
-                    "name": "ASPNET_SECRET_TOKEN",
-                    "value": "${ASPNET_SECRET_TOKEN}"
-                  },
-                  {
-                    "name": "ASPNET_SECURITY_SALT",
-                    "value": "${ASPNET_SECURITY_SALT}"
-                  },
-                  {
-                    "name": "ASPNET_SECURITY_CIPHER_SEED",
-                    "value": "${ASPNET_SECURITY_CIPHER_SEED}"
-                  },
-                  {
-                    "name": "OPCACHE_REVALIDATE_FREQ",
-                    "value": "${OPCACHE_REVALIDATE_FREQ}"
-                  },
                   {
                     "name": "DATABASE_SERVICE_NAME",
                     "value": "${DATABASE_SERVICE_NAME}"
                   },
                   {
-                    "name": "DATABASE_ENGINE",
-                    "value": "${DATABASE_ENGINE}"
-                  },
-                  {
-                    "name": "DATABASE_NAME",
-                    "value": "${DATABASE_NAME}"
-                  },
-                  {
-                    "name": "DATABASE_USER",
+                    "name": "POSTGRESQL_USER",
                     "value": "${DATABASE_USER}"
                   },
                   {
-                    "name": "DATABASE_PASSWORD",
+                    "name": "POSTGRESQL_PASSWORD",
                     "value": "${DATABASE_PASSWORD}"
+                  },
+                  {
+                    "name": "POSTGRESQL_DATABASE",
+                    "value": "${DATABASE_NAME}"
+                  },
+                  {
+                    "name": "POSTGRESQL_MAX_CONNECTIONS",
+                    "value": "${POSTGRESQL_MAX_CONNECTIONS}"
+                  },
+                  {
+                    "name": "POSTGRESQL_SHARED_BUFFERS",
+                    "value": "${POSTGRESQL_SHARED_BUFFERS}"
                   }
-                ]
+                ],
+                "resources": {
+                  "limits": {
+                    "memory": "${MEMORY_LIMIT}"
+                  }
+                }
               }
             ]
           }
@@ -210,11 +220,42 @@
             "labels": { "name": "${DATABASE_SERVICE_NAME}" }
           },
           "spec": {
+            "volumes": [
+              {
+                "name": "data",
+                "emptyDir": {}
+              }
+            ],
             "containers": [
               {
                 "name": "postgresql",
-                "image": "${POSTGRESQL_IMAGE}",
+                "image": "click2cloud/postgresql-92-centos7",
                 "ports": [ { "containerPort": 5432 } ],
+                "readinessProbe": {
+                  "timeoutSeconds": 1,
+                  "initialDelaySeconds": 5,
+                  "exec": {
+                    "command": [
+                      "/bin/sh",
+                      "-i",
+                      "-c",
+                      "psql -h 127.0.0.1 -U ${POSTGRESQL_USER} -q -d ${POSTGRESQL_DATABASE} -c 'SELECT 1'"
+                    ]
+                  }
+                },
+                "livenessProbe": {
+                  "timeoutSeconds": 1,
+                  "initialDelaySeconds": 30,
+                  "tcpSocket": {
+                    "port": 5432
+                  }
+                },
+                "volumeMounts": [
+                  {
+                    "name": "data",
+                    "mountPath": "/var/lib/pgsql/data"
+                  }
+                ],
                 "env": [
                   {
                     "name": "POSTGRESQL_USER",
@@ -227,8 +268,21 @@
                   {
                     "name": "POSTGRESQL_DATABASE",
                     "value": "${DATABASE_NAME}"
+                  },
+                  {
+                    "name": "POSTGRESQL_MAX_CONNECTIONS",
+                    "value": "${POSTGRESQL_MAX_CONNECTIONS}"
+                  },
+                  {
+                    "name": "POSTGRESQL_SHARED_BUFFERS",
+                    "value": "${POSTGRESQL_SHARED_BUFFERS}"
                   }
-                ]
+                ],
+                "resources": {
+                  "limits": {
+                    "memory": "${MEMORY_POSTGRESQL_LIMIT}"
+                  }
+                }
               }
             ]
           }
@@ -238,126 +292,96 @@
   ],
   "parameters": [
     {
+      "name": "NAME",
+      "displayName": "Name",
+      "description": "The name assigned to all of the frontend objects defined in this template.",
+      "value": "aspnet-45-postgresql-ex",
+      "required": true
+    },
+    {
+      "name": "MEMORY_LIMIT",
+      "displayName": "Memory Limit",
+      "description": "Maximum amount of memory the application container can use.",
+      "value": "512Mi",
+      "required": true
+    },
+    {
+      "name": "MEMORY_POSTGRESQL_LIMIT",
+      "displayName": "Memory Limit (PostgreSQL)",
+      "description": "Maximum amount of memory the PostgreSQL container can use.",
+      "value": "512Mi",
+      "required": true
+    },
+    {
       "name": "SOURCE_REPOSITORY_URL",
+      "displayName": "Git Repository URL",
       "description": "The URL of the repository with your application source code",
       "value": "https://github.com/click2cloud/aspnet-45-ex.git",
-      "from": null,
-      "generate": null,
-      "generator": null
+      "required": true
     },
     {
       "name": "SOURCE_REPOSITORY_REF",
-      "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch",
-      "from": null,
-      "generate": null,
-      "generator": null,
-      "value": ""
+      "displayName": "Git Reference",
+      "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch"
     },
     {
       "name": "CONTEXT_DIR",
-      "description": "Set this to the relative path to your project if it is not in the root of your repository",
-      "from": null,
-      "generate": null,
-      "generator": null,
-      "value": ""
+      "displayName": "Context Directory",
+      "description": "Set this to the relative path to your project if it is not in the root of your repository"
     },
     {
-      "name": "APPLICATION_DOMAIN",
-      "description": "The exposed hostname that will route to the ASPNET service, if left blank a value will be defaulted.",
-      "from": null,
-      "generate": null,
-      "generator": null,
-      "value": ""
+      "name": "APPLICATION_HOSTNAME",
+      "displayName": "Application Hostname",
+      "description": "The exposed hostname that will route to the .NET service, if left blank a value will be defaulted."
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",
+      "displayName": "GitHub Webhook Secret",
       "description": "A secret string used to configure the GitHub webhook",
       "generate": "expression",
-      "from": "[a-zA-Z0-9]{40}",
-      "generator": null,
-      "value": ""
+      "from": "[a-zA-Z0-9]{40}"
     },
     {
-      "name": "ASPNET_SECRET_TOKEN",
-      "description": "Set this to a long random string",
+      "name": "GENERIC_WEBHOOK_SECRET",
+      "displayName": "Generic Webhook Secret",
+      "description": "A secret string used to configure the Generic webhook.",
       "generate": "expression",
-      "from": "[\\w]{50}",
-      "generator": null,
-      "value": ""
-    },
-    {
-      "name": "ASPNET_SECURITY_SALT",
-      "description": "Security salt for session hash",
-      "generate": "expression",
-      "from": "[a-zA-Z0-9]{40}",
-      "generator": null,
-      "value": ""
-    },
-    {
-      "name": "ASPNET_SECURITY_CIPHER_SEED",
-      "description": "Security cipher seed for session hash",
-      "generate": "expression",
-      "from": "[0-9]{30}",
-      "generator": null,
-      "value": ""
-    },
-    {
-      "name": "OPCACHE_REVALIDATE_FREQ",
-      "description": "The How often to check script timestamps for updates, in seconds. 0 will result in OPcache checking for updates on every request.",
-      "value": "2",
-      "from": null,
-      "generate": null,
-      "generator": null
+      "from": "[a-zA-Z0-9]{40}"
     },
     {
       "name": "DATABASE_SERVICE_NAME",
-      "description": "Database service name",
+      "displayName": "Database Service Name",
       "value": "postgresql",
-      "from": null,
-      "generate": null,
-      "generator": null
-    },
-    {
-      "name": "DATABASE_ENGINE",
-      "description": "Database engine: postgresql, mysql or sqlite (default)",
-      "value": "postgresql",
-      "from": null,
-      "generate": null,
-      "generator": null
-    },
-    {
-      "name": "DATABASE_NAME",
-      "description": "Database name",
-      "value": "default",
-      "from": null,
-      "generate": null,
-      "generator": null
+      "required": true
     },
     {
       "name": "DATABASE_USER",
-      "description": "Database user name",
-      "value": "cakephp",
-      "from": null,
-      "generate": null,
-      "generator": null
+      "displayName": "Database Username",
+      "generate": "expression",
+      "from": "user[A-Z0-9]{3}"
     },
     {
       "name": "DATABASE_PASSWORD",
-      "description": "Database user password",
+      "displayName": "Database Password",
       "generate": "expression",
-      "from": "[a-zA-Z0-9]{16}",
-      "generator": null,
-      "value": ""
+      "from": "[a-zA-Z0-9]{8}"
     },
     {
-      "name": "POSTGRESQL_IMAGE",
-      "description": "Image to use for postgresql",
-      "value": "openshift/postgresql-92-centos7",
-      "from": null,
-      "generate": null,
-      "generator": null
+      "name": "DATABASE_NAME",
+      "displayName": "Database Name",
+      "value": "root",
+      "required": true
+    },
+    {
+      "name": "POSTGRESQL_MAX_CONNECTIONS",
+      "displayName": "Maximum Database Connections",
+      "value": "100"
+    },
+    {
+      "name": "POSTGRESQL_SHARED_BUFFERS",
+      "displayName": "Shared Buffer Amount",
+      "value": "12MB"
     }
-    
-  ]
- 
+  ],
+  "labels": { "template": "aspnet-45-postgresql-ex" }
 }

@@ -1,13 +1,12 @@
 {
+  "kind": "Template",
+  "apiVersion": "v1",
   "metadata": {
     "name": "aspnet-45-externaldb-ex",
-    "uid": "0016dc07-9728-11e5-be98-00155d00682h",
-    "resourceVersion": "245",
-    "creationTimestamp": "2015-11-30T06:02:56Z",
     "annotations": {
       "description": "An example ASP.NET 4.5 application with external database",
       "iconClass": "icon-aspnet",
-      "tags": "instant-app,aspnet,aspnet4.5,externaldb"
+      "tags": "instant-app,aspnet,aspnet4.5,.net,externaldb"
     }
   },
   "objects": [
@@ -15,7 +14,7 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnet-45-externaldb-ex",
+        "name": "${NAME}",
         "annotations": { "description": "Exposes and load balances the application pods" }
       },
       "spec": {
@@ -26,18 +25,18 @@
             "targetPort": 5000
           }
         ],
-        "selector": { "name": "aspnet-45-externaldb-ex" }
+        "selector": { "name": "${NAME}" }
       }
     },
     {
       "kind": "Route",
       "apiVersion": "v1",
-      "metadata": { "name": "aspnet-45-externaldb-ex" },
+      "metadata": { "name": "${NAME}" },
       "spec": {
-        "host": "${APPLICATION_DOMAIN}",
+        "host": "${APPLICATION_HOSTNAME}",
         "to": {
           "kind": "Service",
-          "name": "aspnet-45-externaldb-ex"
+          "name": "${NAME}"
         }
       }
     },
@@ -45,7 +44,7 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnet-45-externaldb-ex",
+        "name": "${NAME}",
         "annotations": { "description": "Keeps track of changes in the application image" }
       }
     },
@@ -53,7 +52,7 @@
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnet-45-externaldb-ex",
+        "name": "${NAME}",
         "annotations": { "description": "Defines how to build the application" }
       },
       "spec": {
@@ -79,14 +78,19 @@
         "output": {
           "to": {
             "kind": "ImageStreamTag",
-            "name": "aspnet-45-externaldb-ex:latest"
+            "name": "${NAME}:latest"
           }
         },
         "triggers": [
+          { "type": "ConfigChange" },
           { "type": "ImageChange" },
           {
             "type": "GitHub",
             "github": { "secret": "${GITHUB_WEBHOOK_SECRET}" }
+          },
+          {
+            "type": "Generic",
+            "generic": { "secret": "${GENERIC_WEBHOOK_SECRET}" }
           }
         ]
       }
@@ -95,7 +99,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnet-45-externaldb-ex",
+        "name": "${NAME}",
         "annotations": { "description": "Defines how to deploy the application server" }
       },
       "spec": {
@@ -105,62 +109,67 @@
             "type": "ImageChange",
             "imageChangeParams": {
               "automatic": true,
-              "containerNames": [ "aspnet-45-externaldb-ex" ],
+              "containerNames": [ "${NAME}" ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "aspnet-45-externaldb-ex:latest"
+                "name": "${NAME}:latest"
               }
             }
           },
           { "type": "ConfigChange" }
         ],
         "replicas": 1,
-        "selector": { "name": "aspnet-45-externaldb-ex" },
+        "selector": { "name": "${NAME}" },
         "template": {
           "metadata": {
-            "name": "aspnet-45-externaldb-ex",
-            "labels": { "name": "aspnet-45-externaldb-ex" }
+            "name": "${NAME}",
+            "labels": { "name": "${NAME}" }
           },
           "spec": {
             "containers": [
               {
-                "name": "aspnet-45-externaldb-ex",
-                "image": "aspnet-45-externaldb-ex",
+                "name": "${NAME}",
+                "image": "${NAME}",
                 "ports": [ { "containerPort": 5000 } ],
                 "env": [
                   {
-                    "name": "ASPNET_SECRET_TOKEN",
-                    "value": "${ASPNET_SECRET_TOKEN}"
+                    "name": "DATABASE_SERVER",
+                    "value": "${DATABASE_SERVER}"
                   },
                   {
-                    "name": "ASPNET_SECURITY_SALT",
-                    "value": "${ASPNET_SECURITY_SALT}"
-                  },
-                  {
-                    "name": "ASPNET_SECURITY_CIPHER_SEED",
-                    "value": "${ASPNET_SECURITY_CIPHER_SEED}"
-                  },
-                  {
-                    "name": "OPCACHE_REVALIDATE_FREQ",
-                    "value": "${OPCACHE_REVALIDATE_FREQ}"
-                  },
-                  {
-                    "name": "DATABASE_SERVICE_NAME",
-                    "value": "${DATABASE_SERVICE_NAME}"
-                  },
-                  {
-                    "name": "EXTERNALDB_USER",
+                    "name": "DATABASE_USER",
                     "value": "${DATABASE_USER}"
                   },
                   {
-                    "name": "EXTERNALDB_PASSWORD",
+                    "name": "DATABASE_PASSWORD",
                     "value": "${DATABASE_PASSWORD}"
                   },
                   {
-                    "name": "EXTERNALDB_DATABASENAME",
+                    "name": "DATABASE_NAME",
                     "value": "${DATABASE_NAME}"
                   }
-                ]
+                ],
+                "readinessProbe": {
+                  "timeoutSeconds": 3,
+                  "initialDelaySeconds": 3,
+                  "httpGet": {
+                    "path": "/",
+                    "port": 5000
+                  }
+                },
+                "livenessProbe": {
+                  "timeoutSeconds": 3,
+                  "initialDelaySeconds": 30,
+                  "httpGet": {
+                    "path": "/",
+                    "port": 5000
+                  }
+                },
+                "resources": {
+                  "limits": {
+                    "memory": "${MEMORY_LIMIT}"
+                  }
+                }
               }
             ]
           }
@@ -170,111 +179,83 @@
   ],
   "parameters": [
     {
+      "name": "NAME",
+      "displayName": "Name",
+      "description": "The name assigned to all of the frontend objects defined in this template.",
+      "value": "aspnet-45-externaldb-ex",
+      "required": true
+    },
+    {
+      "name": "MEMORY_LIMIT",
+      "displayName": "Memory Limit",
+      "description": "Maximum amount of memory the application container can use.",
+      "value": "512Mi",
+      "required": true
+    },
+    {
       "name": "SOURCE_REPOSITORY_URL",
+      "displayName": "Git Repository URL",
       "description": "The URL of the repository with your application source code",
       "value": "https://github.com/click2cloud/aspnet-45-ex.git",
-      "from": null,
-      "generate": null,
-      "generator": null
+      "required": true
     },
     {
       "name": "SOURCE_REPOSITORY_REF",
-      "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch",
-      "from": null,
-      "generate": null,
-      "generator": null,
-      "value": ""
+      "displayName": "Git Reference",
+      "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch"
     },
     {
       "name": "CONTEXT_DIR",
-      "description": "Set this to the relative path to your project if it is not in the root of your repository",
-      "from": null,
-      "generate": null,
-      "generator": null,
-      "value": ""
+      "displayName": "Context Directory",
+      "description": "Set this to the relative path to your project if it is not in the root of your repository"
     },
     {
-      "name": "APPLICATION_DOMAIN",
-      "description": "The exposed hostname that will route to the ASPNET service, if left blank a value will be defaulted.",
-      "from": null,
-      "generate": null,
-      "generator": null,
-      "value": ""
+      "name": "APPLICATION_HOSTNAME",
+      "displayName": "Application Hostname",
+      "description": "The exposed hostname that will route to the .NET service, if left blank a value will be defaulted."
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",
+      "displayName": "GitHub Webhook Secret",
       "description": "A secret string used to configure the GitHub webhook",
       "generate": "expression",
-      "from": "[a-zA-Z0-9]{40}",
-      "generator": null,
-      "value": ""
+      "from": "[a-zA-Z0-9]{40}"
     },
     {
-      "name": "ASPNET_SECRET_TOKEN",
-      "description": "Set this to a long random string",
+      "name": "GENERIC_WEBHOOK_SECRET",
+      "displayName": "Generic Webhook Secret",
+      "description": "A secret string used to configure the Generic webhook.",
       "generate": "expression",
-      "from": "[\\w]{50}",
-      "generator": null,
-      "value": ""
+      "from": "[a-zA-Z0-9]{40}"
     },
     {
-      "name": "ASPNET_SECURITY_SALT",
-      "description": "Security salt for session hash",
-      "generate": "expression",
-      "from": "[a-zA-Z0-9]{40}",
-      "generator": null,
-      "value": ""
-    },
-    {
-      "name": "ASPNET_SECURITY_CIPHER_SEED",
-      "description": "Security cipher seed for session hash",
-      "generate": "expression",
-      "from": "[0-9]{30}",
-      "generator": null,
-      "value": ""
-    },
-    {
-      "name": "OPCACHE_REVALIDATE_FREQ",
-      "description": "The How often to check script timestamps for updates, in seconds. 0 will result in OPcache checking for updates on every request.",
-      "value": "2",
-      "from": null,
-      "generate": null,
-      "generator": null
-    },
-    {
-      "name": "DATABASE_SERVICE_NAME",
-      "description": "Database service name",
-      "value": "externaldb",
-      "from": null,
-      "generate": null,
-      "generator": null
-    },
-    {
-      "name": "DATABASE_USER",
-      "description": "Username for External DB user that will be used for accessing the database",
-      "generate": "expression",
-      "from": "user[A-Z0-9]{3}",
-      "generator": null,
-      "value": ""
-    },
-    {
-      "name": "DATABASE_PASSWORD",
-      "description": "Password for the MongoDB user",
-      "generate": "expression",
-      "from": "[a-zA-Z0-9]{16}",
-      "generator": null,
-      "value": ""
+      "name": "DATABASE_SERVER",
+      "displayName": "Database server details",
+      "description": "Database server details",
+      "required": true,
+      "value": "DBServer"
     },
     {
       "name": "DATABASE_NAME",
-      "description": "Database name",
-      "value": "",
-      "from": null,
-      "generate": null,
-      "generator": null
+      "displayName": "Database name",
+      "description": "Database Name",
+      "required": true,
+      "value": "DBName"
+    },
+    {
+      "name": "DATABASE_USER",
+      "displayName": "Database user",
+      "description": "Username for External DB user that will be used for accessing the database",
+      "required": true,
+      "value": "DBUser"
+    },
+    {
+      "name": "DATABASE_PASSWORD",
+      "displayName": "Database user password",
+      "description": "Password for the extenal database user.",
+      "required": true,
+      "value": "DBPassword"
     }
   ],
-  "labels": { "template": "aspnet-45-externaldb-ex" },
-  "apiVersion": "v1",
-  "kind": "Template"
+  "labels": { "template": "aspnet-45-externaldb-ex" }
 }

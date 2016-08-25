@@ -14,7 +14,7 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnet-45-example",
+        "name": "${NAME}",
         "annotations": { "description": "Exposes and load balances the application pods" }
       },
       "spec": {
@@ -25,18 +25,18 @@
             "targetPort": 5000
           }
         ],
-        "selector": { "name": "aspnet-45-example" }
+        "selector": { "name": "${NAME}" }
       }
     },
     {
       "kind": "Route",
       "apiVersion": "v1",
-      "metadata": { "name": "aspnet-45-example" },
+      "metadata": { "name": "${NAME}" },
       "spec": {
         "host": "${APPLICATION_HOSTNAME}",
         "to": {
           "kind": "Service",
-          "name": "aspnet-45-example"
+          "name": "${NAME}"
         }
       }
     },
@@ -44,7 +44,7 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnet-45-example",
+        "name": "${NAME}",
         "annotations": { "description": "Keeps track of changes in the application image" }
       }
     },
@@ -52,7 +52,7 @@
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnet-45-example",
+        "name": "${NAME}",
         "annotations": { "description": "Defines how to build the application" }
       },
       "spec": {
@@ -69,7 +69,7 @@
           "sourceStrategy": {
             "from": {
               "kind": "DockerImage",
-              "name": "docker.io/click2cloud/aspnet-4.5-centos7:latest"
+              "name": "click2cloud/aspnet-4.5-centos7:latest"
             },
             "forcePull": false,
             "incremental": true
@@ -78,7 +78,7 @@
         "output": {
           "to": {
             "kind": "ImageStreamTag",
-            "name": "aspnet-45-example:latest"
+            "name": "${NAME}:latest"
           }
         },
         "triggers": [
@@ -99,7 +99,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnet-45-example",
+        "name": "${NAME}",
         "annotations": { "description": "Defines how to deploy the application server" }
       },
       "spec": {
@@ -109,27 +109,27 @@
             "type": "ImageChange",
             "imageChangeParams": {
               "automatic": true,
-              "containerNames": [ "aspnet-45-example" ],
+              "containerNames": [ "${NAME}" ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "aspnet-45-example:latest"
+                "name": "${NAME}:latest"
               }
             }
           },
           { "type": "ConfigChange" }
         ],
         "replicas": 1,
-        "selector": { "name": "aspnet-45-example" },
+        "selector": { "name": "${NAME}" },
         "template": {
           "metadata": {
-            "name": "aspnet-45-example",
-            "labels": { "name": "aspnet-45-example" }
+            "name": "${NAME}",
+            "labels": { "name": "${NAME}" }
           },
           "spec": {
             "containers": [
               {
-                "name": "aspnet-45-example",
-                "image": "aspnet-45-example",
+                "name": "${NAME}",
+                "image": "${NAME}",
                 "ports": [ { "containerPort": 5000 } ],
                 "readinessProbe": {
                   "timeoutSeconds": 3,
@@ -161,9 +161,16 @@
   ],
   "parameters": [
     {
+      "name": "NAME",
+      "displayName": "Name",
+      "description": "The name assigned to all of the frontend objects defined in this template.",
+      "value": "aspnet-45-example",
+      "required": true
+    },
+    {
       "name": "MEMORY_LIMIT",
       "displayName": "Memory Limit",
-      "description": "Maximum amount of memory the .NET Core container can use.",
+      "description": "Maximum amount of memory the application container can use.",
       "value": "512Mi",
       "required": true
     },
@@ -171,7 +178,8 @@
       "name": "SOURCE_REPOSITORY_URL",
       "displayName": "Git Repository URL",
       "description": "The URL of the repository with your application source code",
-      "value": "https://github.com/click2cloud/aspnet-45-ex.git"
+      "value": "https://github.com/click2cloud/aspnet-45-ex.git",
+      "required": true
     },
     {
       "name": "SOURCE_REPOSITORY_REF",
@@ -186,7 +194,7 @@
     {
       "name": "APPLICATION_HOSTNAME",
       "displayName": "Application Hostname",
-      "description": "The exposed hostname that will route to the ASPNET service, if left blank a value will be defaulted."
+      "description": "The exposed hostname that will route to the .NET service, if left blank a value will be defaulted."
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",

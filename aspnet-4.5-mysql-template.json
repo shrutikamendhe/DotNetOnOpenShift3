@@ -14,7 +14,7 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnet-45-mysql-ex",
+        "name": "${NAME}",
         "annotations": { "description": "Exposes and load balances the application pods" }
       },
       "spec": {
@@ -25,18 +25,18 @@
             "targetPort": 5000
           }
         ],
-        "selector": { "name": "aspnet-45-mysql-ex" }
+        "selector": { "name": "${NAME}" }
       }
     },
     {
       "kind": "Route",
       "apiVersion": "v1",
-      "metadata": { "name": "aspnet-45-mysql-ex" },
+      "metadata": { "name": "${NAME}" },
       "spec": {
         "host": "${APPLICATION_HOSTNAME}",
         "to": {
           "kind": "Service",
-          "name": "aspnet-45-mysql-ex"
+          "name": "${NAME}"
         }
       }
     },
@@ -44,7 +44,7 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnet-45-mysql-ex",
+        "name": "${NAME}",
         "annotations": { "description": "Keeps track of changes in the application image" }
       }
     },
@@ -52,7 +52,7 @@
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnet-45-mysql-ex",
+        "name": "${NAME}",
         "annotations": { "description": "Defines how to build the application" }
       },
       "spec": {
@@ -78,7 +78,7 @@
         "output": {
           "to": {
             "kind": "ImageStreamTag",
-            "name": "aspnet-45-mysql-ex:latest"
+            "name": "${NAME}:latest"
           }
         },
         "triggers": [
@@ -99,7 +99,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "aspnet-45-mysql-ex",
+        "name": "${NAME}",
         "annotations": { "description": "Defines how to deploy the application server" }
       },
       "spec": {
@@ -109,27 +109,27 @@
             "type": "ImageChange",
             "imageChangeParams": {
               "automatic": true,
-              "containerNames": [ "aspnet-45-mysql-ex" ],
+              "containerNames": [ "${NAME}" ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "aspnet-45-mysql-ex:latest"
+                "name": "${NAME}:latest"
               }
             }
           },
           { "type": "ConfigChange" }
         ],
         "replicas": 1,
-        "selector": { "name": "aspnet-45-mysql-ex" },
+        "selector": { "name": "${NAME}" },
         "template": {
           "metadata": {
-            "name": "aspnet-45-mysql-ex",
-            "labels": { "name": "aspnet-45-mysql-ex" }
+            "name": "${NAME}",
+            "labels": { "name": "${NAME}" }
           },
           "spec": {
             "containers": [
               {
-                "name": "aspnet-45-mysql-ex",
-                "image": "aspnet-45-mysql-ex",
+                "name": "${NAME}",
+                "image": "${NAME}",
                 "ports": [ { "containerPort": 5000 } ],
                 "readinessProbe": {
                   "timeoutSeconds": 3,
@@ -153,10 +153,6 @@
                     "value": "${DATABASE_SERVICE_NAME}"
                   },
                   {
-                    "name": "DATABASE_ENGINE",
-                    "value": "${DATABASE_ENGINE}"
-                  },
-                  {
                     "name": "DATABASE_NAME",
                     "value": "${DATABASE_NAME}"
                   },
@@ -167,22 +163,6 @@
                   {
                     "name": "DATABASE_PASSWORD",
                     "value": "${DATABASE_PASSWORD}"
-                  },
-                  {
-                    "name": "ASPNET_SECRET_TOKEN",
-                    "value": "${CAKEPHP_SECRET_TOKEN}"
-                  },
-                  {
-                    "name": "ASPNET_SECURITY_SALT",
-                    "value": "${CAKEPHP_SECURITY_SALT}"
-                  },
-                  {
-                    "name": "ASPNET_SECURITY_CIPHER_SEED",
-                    "value": "${CAKEPHP_SECURITY_CIPHER_SEED}"
-                  },
-                  {
-                    "name": "OPCACHE_REVALIDATE_FREQ",
-                    "value": "${OPCACHE_REVALIDATE_FREQ}"
                   }
                 ],
                 "resources": {
@@ -223,7 +203,7 @@
       },
       "spec": {
         "strategy": { "type": "Recreate" },
-        "triggers": [{"type": "ConfigChange"}],
+        "triggers": [ { "type": "ConfigChange" } ],
         "replicas": 1,
         "selector": { "name": "${DATABASE_SERVICE_NAME}" },
         "template": {
@@ -235,7 +215,7 @@
             "containers": [
               {
                 "name": "mysql",
-                "image": "${MYSQL_IMAGE}",
+                "image": "click2cloud/mysql-55-centos7",
                 "ports": [ { "containerPort": 3306 } ],
                 "env": [
                   {
@@ -265,9 +245,16 @@
   ],
   "parameters": [
     {
+      "name": "NAME",
+      "displayName": "Name",
+      "description": "The name assigned to all of the frontend objects defined in this template.",
+      "value": "aspnet-45-mysql-ex",
+      "required": true
+    },
+    {
       "name": "MEMORY_LIMIT",
       "displayName": "Memory Limit",
-      "description": "Maximum amount of memory the ASP.NET container can use.",
+      "description": "Maximum amount of memory the application container can use.",
       "value": "512Mi",
       "required": true
     },
@@ -282,7 +269,8 @@
       "name": "SOURCE_REPOSITORY_URL",
       "displayName": "Git Repository URL",
       "description": "The URL of the repository with your application source code",
-      "value": "https://github.com/click2cloud/aspnet-mysql-sample.git"
+      "value": "https://github.com/click2cloud/aspnet-mysql-sample.git",
+      "required": true
     },
     {
       "name": "SOURCE_REPOSITORY_REF",
@@ -297,7 +285,7 @@
     {
       "name": "APPLICATION_HOSTNAME",
       "displayName": "Application Hostname",
-      "description": "The exposed hostname that will route to the ASPNET service, if left blank a value will be defaulted."
+      "description": "The exposed hostname that will route to the .NET service, if left blank a value will be defaulted."
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",
@@ -316,67 +304,30 @@
     {
       "name": "DATABASE_SERVICE_NAME",
       "displayName": "Database Service Name",
+      "description": "Database Service Name",
       "value": "mysql",
       "required": true
     },
     {
-      "name": "DATABASE_ENGINE",
-      "description": "Database engine: postgresql, mysql or sqlite (default)",
-      "value": "mysql",
-      "from": null,
-      "generate": null,
-      "generator": null
-    },
-    {
       "name": "DATABASE_NAME",
       "displayName": "Database Name",
+      "description": "Database Name",
       "value": "default",
       "required": true
     },
     {
       "name": "DATABASE_USER",
       "displayName": "Database User",
+      "description": "Username for MySQL user that will be used for accessing the database.",
       "value": "aspnet",
       "required": true
     },
     {
       "name": "DATABASE_PASSWORD",
       "displayName": "Database Password",
+      "description": "Password for the MySQL user.",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}"
-    },
-    {
-      "name": "ASPNET_SECRET_TOKEN",
-      "displayName": "ASP.NET secret token",
-      "description": "Set this to a long random string",
-      "generate": "expression",
-      "from": "[\\w]{50}"
-    },
-    {
-      "name": "ASPNET_SECURITY_SALT",
-      "displayName": "ASP.NET Security Salt",
-      "description": "Security salt for session hash",
-      "generate": "expression",
-      "from": "[a-zA-Z0-9]{40}"
-    },
-    {
-      "name": "ASPNET_SECURITY_CIPHER_SEED",
-      "displayName": "ASP.NET Security Cipher Seed",
-      "description": "Security cipher seed for session hash",
-      "generate": "expression",
-      "from": "[0-9]{30}"
-    },
-    {
-      "name": "OPCACHE_REVALIDATE_FREQ",
-      "displayName": "OPcache Revalidation Frequency",
-      "description": "The How often to check script timestamps for updates, in seconds. 0 will result in OPcache checking for updates on every request.",
-      "value": "2"
-    },
-    {
-      "name": "MYSQL_IMAGE",
-      "displayName": "Image to use for mysql",
-      "value": "openshift/mysql-55-centos7",
-      "required": true
     }
   ],
   "labels": { "template": "aspnet-45-mysql-ex" }
