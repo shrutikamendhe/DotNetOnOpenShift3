@@ -60,3 +60,20 @@ oc create -f aspnet-core-1.0-mongodb-template.json
 oc create -f aspnet-core-1.0-mysql-template.json
 oc create -f aspnet-core-1.0-postgresql-template.json
 ```
+
+## Compatible Test run on below environment for templates
+
+| Template        | OpenShift Enterprise | OpenShift Origin  |
+| --------------- |:-----------------:| :-----:|
+| aspnet-4.5-template      | Yes| Yes |
+| aspnet-4.5-externaldb-template      | Yes      |   Yes |
+| aspnet-4.5-mongodb-template | Yes      |    Yes |
+| aspnet-4.5-mysql-template | Yes      |    Yes |
+| aspnet-4.5-postgresql-template | Yes      |    Yes |
+| aspnet-core-1.0-template | Yes      |    Yes |
+| aspnet-core-1.0-externaldb-template | Yes      |    Yes |
+| aspnet-core-1.0-mongodb-template | Yes      |    Yes |
+| aspnet-core-1.0-mysql-template | Yes      |    Yes |
+| aspnet-core-1.0-postgresql-template | Yes      |    Yes |
+
+NOTE: This version is not tested on OpenShift Online Environment.

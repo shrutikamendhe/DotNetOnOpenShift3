@@ -131,22 +131,6 @@
                 "name": "${NAME}",
                 "image": "${NAME}",
                 "ports": [ { "containerPort": 5000 } ],
-                "readinessProbe": {
-                  "timeoutSeconds": 3,
-                  "initialDelaySeconds": 3,
-                  "httpGet": {
-                    "path": "/",
-                    "port": 5000
-                  }
-                },
-                "livenessProbe": {
-                  "timeoutSeconds": 3,
-                  "initialDelaySeconds": 30,
-                  "httpGet": {
-                    "path": "/",
-                    "port": 5000
-                  }
-                },
                 "resources": {
                   "limits": {
                     "memory": "${MEMORY_LIMIT}"
@@ -194,7 +178,7 @@
     {
       "name": "APPLICATION_HOSTNAME",
       "displayName": "Application Hostname",
-      "description": "The exposed hostname that will route to the ASPNET service, if left blank a value will be defaulted."
+      "description": "The exposed hostname that will route to the .NET service, if left blank a value will be defaulted."
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",
